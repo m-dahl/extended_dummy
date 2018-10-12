@@ -44,9 +44,9 @@ def main(args=None):
         # build new state
         msg = State()
         msg.act_pos = act_pos
-        msg.ref_pos = ref_pos
-        msg.active = active
         msg.has_tool = has_tool
+        msg.ack_ref_pos = ref_pos
+        msg.ack_active = active
 
         node.get_logger().info('Publishing: "%s"' % msg)
         publisher.publish(msg)
