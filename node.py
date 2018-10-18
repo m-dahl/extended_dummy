@@ -35,8 +35,10 @@ def main(args=None):
     act_pos = 0
     has_tool = False
 
+    idle_counter = 0
+
     def timer_callback():
-        nonlocal act_pos, ref_pos, active, has_tool
+        nonlocal act_pos, ref_pos, active, has_tool, idle_counter
         if active and ref_pos != act_pos:
             diff = ref_pos-act_pos
             act_pos = act_pos + int(math.copysign(1, diff))
@@ -48,17 +50,27 @@ def main(args=None):
         msg.ack_ref_pos = ref_pos
         msg.ack_active = active
 
-        node.get_logger().info('Publishing: "%s"' % msg)
-        publisher.publish(msg)
+        idle_counter+=1
+        if (idle_counter > 25):
+            node.get_logger().info('Idle, resetting to intial state')
+            act_pos = 0
+            ref_pos = 0
+            active = False
+            has_tool = False
+        else:
+            node.get_logger().info('Publishing: "%s"' % msg)
+            publisher.publish(msg)
+
 
     timer_period = 0.2  # seconds
     timer = node.create_timer(timer_period, timer_callback)
 
     def control_callback(msg):
-        nonlocal active, ref_pos
+        nonlocal active, ref_pos, idle_counter
         active = msg.active
         ref_pos = msg.ref_pos
         node.get_logger().info('I heard: "%s"' % msg)
+        idle_counter = 0
 
     subscription = node.create_subscription(Control, control_topic, control_callback)
     # subscription  # prevent unused variable warning
