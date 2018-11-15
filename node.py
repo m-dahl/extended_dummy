@@ -15,7 +15,7 @@
 import rclpy
 import math
 from std_msgs.msg import String
-from unification_msgs.msg import State, Control
+from extended_dummy_messages.msg import State, Control
 
 from sys import argv
 
